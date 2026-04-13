@@ -1,0 +1,32 @@
+email,score,status,reasons
+normal.user@gmail.com,5,Safe,
+jane.doe@yahoo.com,8,Safe,
+support-account-update@secure-login.verify,78,Harmful,Contains sensitive keywords
+bank-alerts@account-security.bank,85,Threat,Contains sensitive keywords
+promo.winner@lottery-prize.info,82,Threat,Suspicious TLD
+temp.user@mailinator.com,92,Danger,Disposable domain
+random1234567@domain.com,72,Harmful,Excessive digits
+it-admin@company.co,40,Safe,
+helpdesk.verify@corp-support.com,76,Harmful,Contains sensitive keywords
+no-reply@payments-portal.cn,90,Danger,Suspicious TLD
+updates@newsletter.example,15,Safe,
+security-team@vpn-login.top,88,Threat,Suspicious TLD
+billing@my-service.com,35,Safe,
+verify-account@free-trial.ru,94,Danger,Suspicious TLD
+john.smith@proton.me,10,Safe,
+contact@trustedsite.org,12,Safe,
+hr.recruitment@jobs-careers.io,25,Safe,
+giftcard@free-offers.tk,91,Danger,Suspicious TLD
+admin@portal-login.zip,93,Danger,Suspicious TLD
+alerts@bankofexample.com,60,Harmful,Contains sensitive keywords
+
+
+
+
+
+
+
+
+
+
+

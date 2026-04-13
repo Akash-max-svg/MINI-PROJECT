@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Cyber Threat Checkur</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root{
+      --bg:#0d1117; --surface:#161b22; --border:#30363d;
+      --accent:#0077b6; --accent2:#00b4d8;
+      --safe:#06d6a0; --danger:#ef476f;
+      --text:#e6edf3; --muted:#8b949e;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family:'Inter','Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0d1b2a,#0d1117,#0d0f1c);
+      color:var(--text); min-height:100vh;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .box{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:18px; padding:36px 32px; width:100%; max-width:440px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.5);
+      animation:fadeUp 0.4s ease;
+    }
+    @keyframes fadeUp{ from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .logo{ font-size:2rem; margin-bottom:6px; }
+    h2{ font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+    .sub{ font-size:0.83rem; color:var(--muted); margin-bottom:24px; }
+
+    form{ display:flex; flex-direction:column; gap:12px; }
+    input, textarea, select{
+      padding:12px 14px; border-radius:9px;
+      background:#0d1117; border:1px solid var(--border);
+      color:var(--text); font-size:14px; font-family:inherit;
+      transition:border-color 0.2s; width:100%;
+    }
+    input:focus, textarea:focus, select:focus{
+      outline:none; border-color:var(--accent2);
+    }
+    input::placeholder, textarea::placeholder{ color:var(--muted); }
+    textarea{ resize:vertical; min-height:70px; }
+
+    .btn{
+      padding:12px; border-radius:9px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; border:none; cursor:pointer;
+      font-weight:700; font-size:15px; font-family:inherit;
+      transition:opacity 0.2s, transform 0.2s;
+    }
+    .btn:hover{ opacity:0.88; transform:translateY(-1px); }
+
+    .divider{
+      display:flex; align-items:center; gap:10px;
+      color:var(--muted); font-size:0.78rem; margin:4px 0;
+    }
+    .divider::before,.divider::after{
+      content:''; flex:1; height:1px; background:var(--border);
+    }
+
+    .social-btn{
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:11px; border-radius:9px; font-weight:600; font-size:14px;
+      border:1px solid var(--border); cursor:pointer; font-family:inherit;
+      background:var(--surface); color:var(--text);
+      transition:border-color 0.2s, background 0.2s;
+    }
+    .social-btn:hover{ border-color:var(--accent2); background:rgba(0,180,216,0.06); }
+
+    .toggle-row{
+      text-align:center; font-size:0.83rem; color:var(--muted); margin-top:4px;
+    }
+    .toggle-row a{ color:var(--accent2); text-decoration:none; font-weight:600; }
+    .toggle-row a:hover{ text-decoration:underline; }
+
+    .err{ color:var(--danger); font-size:0.78rem; display:none; }
+    .ok { color:var(--safe);   font-size:0.78rem; display:none; }
+    .link-sm{ color:var(--accent2); font-size:0.78rem; text-decoration:none; text-align:center; }
+    .link-sm:hover{ text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">🛡</div>
+    <h2 id="formTitle">Sign In</h2>
+    <p class="sub" id="formSub">Welcome back — sign in to continue</p>
+
+    <!-- Login -->
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button class="btn" type="submit">Sign In</button>
+      <a class="link-sm" href="#" id="forgotLink">Forgot password?</a>
+    </form>
+
+    <!-- Register -->
+    <form id="registerForm" style="display:none;">
+      <input type="text"     id="name"     placeholder="Full Name" required>
+      <input type="number"   id="age"      placeholder="Age" required>
+      <input type="tel"      id="phone"    placeholder="Mobile Number" required>
+      <input type="email"    id="email"    placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password (6+ chars, 2 uppercase, 1 symbol, 2 numbers)" required>
+      <textarea              id="address"  placeholder="Address"></textarea>
+      <div class="err" id="passErr"></div>
+      <button class="btn" type="submit">Create Account</button>
+    </form>
+
+    <!-- Reset -->
+    <form id="resetForm" style="display:none;">
+      <input type="email"    id="resetEmail"    placeholder="Registered Email" required>
+      <input type="password" id="resetPassword" placeholder="New Password" required>
+      <div class="err" id="resetErr"></div>
+      <div class="ok"  id="resetOk"></div>
+      <button class="btn" type="submit">Reset Password</button>
+      <a class="link-sm" href="#" id="backLogin">← Back to Sign In</a>
+    </form>
+
+    <div class="toggle-row" id="toggleRow" style="margin-top:16px;">
+      <span id="toggleText">Don't have an account?</span>
+      <a href="#" onclick="toggleForm()"> Register</a>
+    </div>
+
+    <div class="divider" style="margin-top:20px;">or continue with</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+      <button class="social-btn" onclick="socialLogin('Google')">🔴 Sign in with Google</button>
+      <button class="social-btn" onclick="socialLogin('Apple')">🍎 Sign in with Apple</button>
+      <button class="social-btn" onclick="socialLogin('Instagram')">📸 Sign in with Instagram</button>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'login'; // login | register | reset
+
+    function show(formId, title, sub, showToggle=true) {
+      ['loginForm','registerForm','resetForm'].forEach(id =>
+        document.getElementById(id).style.display = 'none');
+      document.getElementById(formId).style.display = 'flex';
+      document.getElementById('formTitle').textContent = title;
+      document.getElementById('formSub').textContent = sub;
+      document.getElementById('toggleRow').style.display = showToggle ? 'block' : 'none';
+    }
+
+    function toggleForm() {
+      if (mode === 'login') {
+        mode = 'register';
+        show('registerForm','Create Account','Fill in your details to get started');
+        document.getElementById('toggleText').textContent = 'Already have an account?';
+        const a = document.querySelector('#toggleRow a');
+        a.textContent = ' Sign In';
+        a.onclick = (e) => { e.preventDefault(); toggleForm(); };
+      } else {
+        mode = 'login';
+        show('loginForm','Sign In','Welcome back — sign in to continue');
+        document.getElementById('toggleText').textContent = "Don't have an account?";
+        const a = document.querySelector('#toggleRow a');
+        a.textContent = ' Register';
+        a.onclick = (e) => { e.preventDefault(); toggleForm(); };
+      }
+    }
+
+    document.getElementById('forgotLink').onclick = e => {
+      e.preventDefault(); mode = 'reset';
+      show('resetForm','Reset Password','Enter your email and a new password', false);
+    };
+    document.getElementById('backLogin').onclick = e => {
+      e.preventDefault(); mode = 'login';
+      show('loginForm','Sign In','Welcome back — sign in to continue');
+    };
+
+    // Login
+    document.getElementById('loginForm').onsubmit = async e => {
+      e.preventDefault();
+      const r = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:document.getElementById('loginEmail').value,
+          password:document.getElementById('loginPassword').value})});
+      const d = await r.json();
+      if (d.success) {
+        localStorage.setItem('userData', JSON.stringify(d.user));
+        localStorage.setItem('authToken','authenticated');
+        location.href='index.html';
+      } else { alert('Login failed: '+d.error); }
+    };
+
+    // Register
+    function validatePassword(p) {
+      const errs=[];
+      if(p.length<6) errs.push('6+ characters');
+      if((p.match(/[A-Z]/g)||[]).length<2) errs.push('2 uppercase letters');
+      if((p.match(/[0-9]/g)||[]).length<2) errs.push('2 numbers');
+      if(!/[!@#$%^&*(),.?":{}|<>]/.test(p)) errs.push('1 special symbol');
+      return errs;
+    }
+    document.getElementById('registerForm').onsubmit = async e => {
+      e.preventDefault();
+      const pw = document.getElementById('password').value;
+      const errs = validatePassword(pw);
+      const errEl = document.getElementById('passErr');
+      if (errs.length) { errEl.textContent='Password needs: '+errs.join(', '); errEl.style.display='block'; return; }
+      errEl.style.display='none';
+      const body = {
+        name:document.getElementById('name').value, age:document.getElementById('age').value,
+        phone:document.getElementById('phone').value, email:document.getElementById('email').value,
+        password:pw, address:document.getElementById('address').value
+      };
+      const r = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d = await r.json();
+      if (d.success) {
+        localStorage.setItem('userData',JSON.stringify(body));
+        localStorage.setItem('authToken','authenticated');
+        location.href='index.html';
+      } else { alert('Registration failed: '+d.error); }
+    };
+
+    // Reset
+    document.getElementById('resetForm').onsubmit = async e => {
+      e.preventDefault();
+      const errEl=document.getElementById('resetErr'), okEl=document.getElementById('resetOk');
+      errEl.style.display='none'; okEl.style.display='none';
+      const r = await fetch('/api/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:document.getElementById('resetEmail').value,
+          newPassword:document.getElementById('resetPassword').value})});
+      const d = await r.json();
+      if (d.success) {
+        okEl.textContent='Password reset! Redirecting to login…'; okEl.style.display='block';
+        setTimeout(()=>{ mode='login'; show('loginForm','Sign In','Welcome back'); },1200);
+      } else { errEl.textContent=d.error||'Failed'; errEl.style.display='block'; }
+    };
+
+    function socialLogin(provider) {
+      const id = Math.random().toString(36).slice(2,10);
+      const map = {
+        Google:    {name:'Google User',    email:`google.${id}@gmail.com`},
+        Apple:     {name:'Apple User',     email:`apple.${id}@icloud.com`},
+        Instagram: {name:'Instagram User', email:`insta.${id}@instagram.com`},
+      };
+      localStorage.setItem('userData', JSON.stringify({...map[provider], age:25, phone:'0000000000', address:''}));
+      localStorage.setItem('authToken','authenticated');
+      localStorage.setItem('loginProvider', provider);
+      location.href='index.html';
+    }
+  </script>
+</body>
+</html>

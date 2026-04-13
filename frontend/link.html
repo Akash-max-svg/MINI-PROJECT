@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Threat Checker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root {
+      --bg:#0d1117; --surface:#161b22; --surface2:#1c2333;
+      --border:#30363d; --accent:#0077b6; --accent2:#00b4d8;
+      --safe:#06d6a0; --warn:#ffd166; --danger:#ef476f; --ddanger:#c0392b;
+      --text:#e6edf3; --muted:#8b949e;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family:'Inter','Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0d1b2a,#0d1117,#0d0f1c);
+      color:var(--text); min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+    }
+
+    /* header */
+    header{
+      width:100%; background:rgba(13,17,23,0.95);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      padding:14px 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+    }
+    .header-left{ display:flex; align-items:center; gap:12px; }
+    .header-left a{ color:var(--accent2); text-decoration:none; font-size:0.85rem; }
+    header h1{ font-size:1.1rem; font-weight:700; color:var(--accent2); }
+    header p{ font-size:0.78rem; color:var(--muted); margin-top:2px; }
+
+    /* main */
+    main{
+      width:100%; max-width:720px;
+      padding:32px 16px 48px;
+      display:flex; flex-direction:column; gap:18px;
+    }
+
+    /* input card */
+    .input-card{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:22px;
+    }
+    .input-card h2{ font-size:1rem; margin-bottom:14px; color:var(--text); }
+    .input-row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .input-row input{
+      flex:1 1 300px; padding:12px 14px; border-radius:8px;
+      background:#0d1117; border:1px solid var(--border);
+      color:var(--text); font-size:15px; font-family:inherit;
+    }
+    .input-row input:focus{ outline:none; border-color:var(--accent2); }
+    .check-btn{
+      padding:12px 22px; border-radius:8px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; border:none; cursor:pointer;
+      font-weight:700; font-size:15px; font-family:inherit;
+      white-space:nowrap; transition:opacity 0.2s;
+    }
+    .check-btn:hover{ opacity:0.85; }
+
+    /* scan bar */
+    #scanBar{
+      display:none; height:3px; border-radius:2px; margin-top:12px;
+      background:linear-gradient(90deg,transparent,var(--accent2),transparent);
+      background-size:200%; animation:sweep 1.2s linear infinite;
+    }
+    @keyframes sweep{ 0%{background-position:200%} 100%{background-position:-200%} }
+
+    /* result card */
+    #resultCard{ display:none; flex-direction:column; gap:14px; }
+
+    /* status banner */
+    .status-banner{
+      border-radius:12px; padding:18px 22px;
+      display:flex; align-items:center; gap:16px;
+      border:1px solid transparent;
+    }
+    .status-banner.s-safe   { background:rgba(6,214,160,0.08);  border-color:var(--safe); }
+    .status-banner.s-warn   { background:rgba(255,209,102,0.08); border-color:var(--warn); }
+    .status-banner.s-danger { background:rgba(239,71,111,0.08);  border-color:var(--danger); }
+    .status-banner.s-ddanger{ background:rgba(192,57,43,0.1);    border-color:var(--ddanger); }
+    .s-icon{ font-size:2.2rem; }
+    .s-text h2{ font-size:1.15rem; font-weight:700; }
+    .s-text p { font-size:0.83rem; color:var(--muted); margin-top:4px; }
+
+    /* risk bar */
+    .risk-wrap{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:16px 20px;
+    }
+    .risk-label{ font-size:0.78rem; color:var(--muted); margin-bottom:8px;
+      display:flex; justify-content:space-between; }
+    .risk-track{
+      background:rgba(255,255,255,0.05); border-radius:8px;
+      height:18px; overflow:hidden;
+    }
+    .risk-bar{
+      height:100%; width:0%;
+      transition:width 900ms cubic-bezier(.4,0,.2,1);
+      border-radius:8px; display:flex; align-items:center;
+      justify-content:center; font-size:11px; font-weight:700;
+    }
+    .rb-safe   { background:linear-gradient(90deg,var(--safe),#04c58d); color:#002; }
+    .rb-warn   { background:linear-gradient(90deg,var(--warn),#e6b800); color:#002; }
+    .rb-danger { background:linear-gradient(90deg,var(--danger),#d13b5d); color:#fff; }
+    .rb-ddanger{ background:linear-gradient(90deg,#c0392b,#922b21); color:#fff; }
+
+    /* detail grid */
+    .detail-grid{
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+    }
+    @media(max-width:480px){ .detail-grid{ grid-template-columns:1fr; } }
+    .d-tile{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:14px 16px;
+    }
+    .d-tile .lbl{ font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; }
+    .d-tile .val{ font-size:0.95rem; font-weight:600; word-break:break-all; }
+
+    /* flags */
+    .flags-card{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:16px 20px;
+    }
+    .flags-card h4{ font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+    .flag-list{ display:flex; flex-wrap:wrap; gap:8px; }
+    .flag{
+      padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:600;
+      border:1px solid;
+    }
+    .flag-red  { background:rgba(239,71,111,0.12); border-color:var(--danger); color:var(--danger); }
+    .flag-warn { background:rgba(255,209,102,0.12); border-color:var(--warn); color:var(--warn); }
+    .flag-ok   { background:rgba(6,214,160,0.12);  border-color:var(--safe); color:var(--safe); }
+
+    /* examples */
+    .examples-card{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:16px 20px;
+    }
+    .examples-card h4{ font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+    .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    @media(max-width:480px){ .ex-grid{ grid-template-columns:1fr; } }
+    .ex-btn{
+      padding:8px 12px; border-radius:8px; font-size:0.82rem;
+      background:var(--surface2); border:1px solid var(--border);
+      color:var(--muted); cursor:pointer; text-align:left;
+      transition:all 0.2s; font-family:inherit;
+    }
+    .ex-btn:hover{ border-color:var(--accent2); color:var(--accent2); background:rgba(0,180,216,0.06); }
+
+    footer{
+      width:100%; background:rgba(13,17,23,0.95);
+      border-top:1px solid var(--border);
+      padding:16px; font-size:0.78rem; color:var(--muted);
+      text-align:center; margin-top:auto;
+    }
+  </style>
+</head>
+<body>
+  <script>(function(){ if(!localStorage.getItem('authToken')) window.location.href='login.html'; })();</script>
+
+  <header>
+    <div class="header-left">
+      <a href="index.html">🛡 Home</a>
+      <div>
+        <h1>🌐 Link Threat Checker</h1>
+        <p>AI-powered phishing & malware detection</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="number.html" style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">📱 Numbers</a>
+      <a href="complaint.html" style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">📝 Complaint</a>
+      <a href="login.html" onclick="localStorage.removeItem('authToken');localStorage.removeItem('userData');localStorage.removeItem('loginProvider');" style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">Logout</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Input -->
+    <div class="input-card">
+      <h2>Enter a URL to analyze</h2>
+      <div class="input-row">
+        <input id="urlInput" type="text" placeholder="https://example.com">
+        <button class="check-btn" onclick="checkLink()">🔍 Analyze</button>
+      </div>
+      <div id="scanBar"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="resultCard">
+      <div id="statusBanner" class="status-banner">
+        <div class="s-icon" id="sIcon">—</div>
+        <div class="s-text">
+          <h2 id="sTitle">—</h2>
+          <p id="sMsg">—</p>
+        </div>
+      </div>
+
+      <div class="risk-wrap">
+        <div class="risk-label">
+          <span>Risk Score</span>
+          <span id="riskPct">0%</span>
+        </div>
+        <div class="risk-track">
+          <div class="risk-bar" id="riskBar">0%</div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="d-tile"><div class="lbl">URL Checked</div><div class="val" id="dUrl">—</div></div>
+        <div class="d-tile"><div class="lbl">Protocol</div><div class="val" id="dProto">—</div></div>
+        <div class="d-tile"><div class="lbl">Domain</div><div class="val" id="dDomain">—</div></div>
+        <div class="d-tile"><div class="lbl">Verdict</div><div class="val" id="dVerdict">—</div></div>
+      </div>
+
+      <div class="flags-card">
+        <h4>🚩 Detection Signals</h4>
+        <div class="flag-list" id="flagList"></div>
+      </div>
+    </div>
+
+    <!-- Examples -->
+    <div class="examples-card">
+      <h4>🔗 Quick Examples</h4>
+      <div class="ex-grid">
+        <button class="ex-btn" onclick="useExample('https://google.com')">✅ google.com</button>
+        <button class="ex-btn" onclick="useExample('https://github.com')">✅ github.com</button>
+        <button class="ex-btn" onclick="useExample('https://wikipedia.org')">✅ wikipedia.org</button>
+        <button class="ex-btn" onclick="useExample('https://bankofamerica.com')">✅ bankofamerica.com</button>
+        <button class="ex-btn" onclick="useExample('http://phishingsite.fake')">⚠️ phishingsite.fake</button>
+        <button class="ex-btn" onclick="useExample('http://suspicious-login.net')">⚠️ suspicious-login.net</button>
+        <button class="ex-btn" onclick="useExample('http://malware-download.biz')">🚨 malware-download.biz</button>
+        <button class="ex-btn" onclick="useExample('http://hacked-portal.ru')">🚨 hacked-portal.ru</button>
+        <button class="ex-btn" onclick="useExample('http://paypa1-verify-account.tk')">☠️ paypa1-verify.tk</button>
+        <button class="ex-btn" onclick="useExample('http://free-money-scam.xyz')">☠️ free-money-scam.xyz</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2025 Cyber Threat Checkur &nbsp;|&nbsp; Link Threat Checker</footer>
+
+  <script>
+    function useExample(url) {
+      document.getElementById('urlInput').value = url;
+      checkLink();
+    }
+
+    function getDomain(url) {
+      try { return new URL(url.startsWith('http') ? url : 'http://'+url).hostname; }
+      catch(e){ return url; }
+    }
+
+    async function checkLink() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) { alert('Please enter a URL.'); return; }
+
+      document.getElementById('scanBar').style.display = 'block';
+      document.getElementById('resultCard').style.display = 'none';
+
+      try {
+        const res = await fetch('http://localhost:3000/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        document.getElementById('scanBar').style.display = 'none';
+        renderResult(url, data);
+      } catch(err) {
+        document.getElementById('scanBar').style.display = 'none';
+        alert('Error connecting to server.');
+      }
+    }
+
+    function renderResult(url, data) {
+      const card = document.getElementById('resultCard');
+      card.style.display = 'flex';
+
+      const label = (data.label || 'Safe').toLowerCase();
+      const score = data.score || 0;
+
+      // Status banner
+      const banner = document.getElementById('statusBanner');
+      const icon   = document.getElementById('sIcon');
+      const title  = document.getElementById('sTitle');
+      const msg    = document.getElementById('sMsg');
+      banner.className = 'status-banner';
+
+      const configs = {
+        safe:    { cls:'s-safe',    icon:'✅', title:'Safe Website',          msg:'No threats detected. This URL appears safe.' },
+        harmful: { cls:'s-warn',    icon:'⚠️', title:'Potentially Harmful',   msg:'This URL has suspicious characteristics.' },
+        threat:  { cls:'s-danger',  icon:'🚨', title:'Threat Detected',       msg:'This URL shows strong indicators of malicious activity.' },
+        danger:  { cls:'s-ddanger', icon:'☠️', title:'Very Dangerous',        msg:'High-confidence phishing or malware site. Do not visit.' },
+      };
+      const cfg = configs[label] || configs.safe;
+      banner.classList.add(cfg.cls);
+      icon.textContent  = cfg.icon;
+      title.textContent = cfg.title;
+      msg.textContent   = cfg.msg;
+
+      // Risk bar
+      const bar = document.getElementById('riskBar');
+      const pct = document.getElementById('riskPct');
+      bar.style.width = score + '%';
+      bar.textContent = score + '%';
+      pct.textContent = score + '%';
+      bar.className = 'risk-bar ' +
+        (label === 'safe' ? 'rb-safe' : label === 'harmful' ? 'rb-warn' :
+         label === 'threat' ? 'rb-danger' : 'rb-ddanger');
+
+      // Detail tiles
+      document.getElementById('dUrl').textContent     = url.length > 50 ? url.slice(0,50)+'…' : url;
+      document.getElementById('dProto').textContent   = url.startsWith('https') ? '🔒 HTTPS' : '⚠️ HTTP (Insecure)';
+      document.getElementById('dDomain').textContent  = getDomain(url);
+      document.getElementById('dVerdict').textContent = cfg.title;
+
+      // Detection flags
+      const flagList = document.getElementById('flagList');
+      flagList.innerHTML = '';
+      const lower = url.toLowerCase();
+      const flags = [];
+
+      if (!url.startsWith('https')) flags.push({ text:'No HTTPS', cls:'flag-red' });
+      else flags.push({ text:'HTTPS Secure', cls:'flag-ok' });
+
+      const threatWords = ['phishing','malware','hack','scam','fraud','fake','login','verify','bank','password','wallet','crypto','prize','free','urgent','suspended'];
+      const hits = threatWords.filter(w => lower.includes(w));
+      if (hits.length) flags.push({ text:`Threat keywords: ${hits.slice(0,3).join(', ')}`, cls:'flag-red' });
+
+      const badTlds = ['.ru','.tk','.ml','.ga','.cf','.gq','.xyz','.top','.click','.download','.zip'];
+      if (badTlds.some(t => lower.includes(t))) flags.push({ text:'Suspicious TLD', cls:'flag-red' });
+
+      if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url)) flags.push({ text:'IP Address URL', cls:'flag-red' });
+      if (url.includes('@')) flags.push({ text:'@ Sign in URL', cls:'flag-red' });
+      if (/paypa1|g00gle|arnazon|micros0ft|faceb00k|app1e|netfl1x/.test(lower)) flags.push({ text:'Brand Mimicry', cls:'flag-red' });
+      if (lower.includes('redirect') || lower.includes('url=') || lower.includes('goto=')) flags.push({ text:'Redirect Pattern', cls:'flag-warn' });
+      if (url.length > 100) flags.push({ text:`Long URL (${url.length} chars)`, cls:'flag-warn' });
+      if ((url.match(/-/g)||[]).length > 3) flags.push({ text:'Many Hyphens', cls:'flag-warn' });
+
+      try {
+        const h = new URL(url.startsWith('http') ? url : 'http://'+url).hostname;
+        const parts = h.split('.');
+        if (parts.length > 3) flags.push({ text:`${parts.length-2} Subdomains`, cls:'flag-warn' });
+      } catch(e){}
+
+      if (!flags.length) flags.push({ text:'No suspicious signals', cls:'flag-ok' });
+
+      flags.forEach(f => {
+        const span = document.createElement('span');
+        span.className = 'flag ' + f.cls;
+        span.textContent = f.text;
+        flagList.appendChild(span);
+      });
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') checkLink(); });
+  </script>
+</body>
+</html>
