@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Threat Checkur</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>🛡 Cyber Threat Checkur</h1>
+    <div id="userInfo" style="display:none;">
+      <span id="welcomeMsg"></span>
+    </div>
+    <nav>
+      <button onclick="checkAuth('login.html')" id="loginBtn">Login</button>
+      <button onclick="checkAuth('number.html')">📱 Number Checker</button>
+      <button onclick="checkAuth('link.html')">🌐 Link Checker</button>
+      <button onclick="checkAuth('complaint.html')">📝 Complaint</button>
+      <button onclick="logout()" id="logoutBtn" style="display:none; background:#c0392b; border-color:#c0392b; color:#fff;">Logout</button>
+    </nav>
+  </header>
+
+  <section id="hero">
+    <h2>Protect Yourself from Cyber Threats</h2>
+    <p>AI-powered detection for fraud numbers, malicious links, and online scams.</p>
+  </section>
+
+  <section class="cards-container">
+    <section class="card">
+      <img src="images/number.webp" alt="Phone" class="box-img">
+      <h2>📱 Number Threat Checker</h2>
+      <p>Detect fraud, spam, and dangerous phone numbers using a 7-model AI ensemble with real carrier lookup.</p>
+      <button class="action" onclick="checkAuth('number.html')">Check a Number</button>
+    </section>
+
+    <section class="card">
+      <img src="images/linkreleted.webp" alt="Link" class="box-img">
+      <h2>🌐 Link Threat Checker</h2>
+      <p>Analyze URLs for phishing, malware, brand mimicry, and malicious patterns using AI detection.</p>
+      <button class="action" onclick="checkAuth('link.html')">Check a Link</button>
+    </section>
+
+    <section class="card">
+      <img src="images/complaint.jpeg" alt="Complaint" class="box-img">
+      <h2>📝 File a Complaint</h2>
+      <p>Encountered a suspicious number or website? Submit a formal complaint to our database.</p>
+      <button class="action" onclick="checkAuth('complaint.html')">File Complaint</button>
+    </section>
+  </section>
+
+  <footer>
+    <p>© 2025 Cyber Threat Checkur &nbsp;|&nbsp; Securing the Digital World</p>
+  </footer>
+
+  <script>
+    // Auth state display (script.js handles checkAuth/logout)
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData');
+    if (token && userData) {
+      try {
+        const user = JSON.parse(userData);
+        const provider = localStorage.getItem('loginProvider');
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'inline-block';
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('welcomeMsg').textContent =
+          'Welcome, ' + user.name + (provider ? ' (' + provider + ')' : '');
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>

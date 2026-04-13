@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File a Complaint — Cyber Threat Checkur</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root{
+      --bg:#0d1117; --surface:#161b22; --surface2:#1c2333;
+      --border:#30363d; --accent:#0077b6; --accent2:#00b4d8;
+      --safe:#06d6a0; --danger:#ef476f; --warn:#ffd166;
+      --text:#e6edf3; --muted:#8b949e;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family:'Inter','Segoe UI',sans-serif;
+      background:linear-gradient(135deg,#0d1b2a,#0d1117,#0d0f1c);
+      color:var(--text); min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+    }
+
+    header{
+      width:100%; background:rgba(13,17,23,0.95);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:14px 24px; display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:100;
+    }
+    header a{ color:var(--accent2); text-decoration:none; font-size:0.85rem; }
+    header h1{ font-size:1.1rem; font-weight:700; color:var(--accent2); }
+    header p{ font-size:0.78rem; color:var(--muted); margin-top:2px; }
+
+    main{
+      width:100%; max-width:680px;
+      padding:32px 16px 48px;
+      display:flex; flex-direction:column; gap:16px;
+    }
+
+    .card{
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:24px;
+    }
+    .card h3{ font-size:0.95rem; font-weight:700; margin-bottom:18px; color:var(--text); }
+
+    .field{ display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+    .field label{ font-size:0.78rem; color:var(--muted); font-weight:500; }
+    .field input, .field textarea, .field select{
+      padding:11px 13px; border-radius:8px;
+      background:#0d1117; border:1px solid var(--border);
+      color:var(--text); font-size:14px; font-family:inherit;
+      transition:border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus{
+      outline:none; border-color:var(--accent2);
+    }
+    .field input::placeholder, .field textarea::placeholder{ color:var(--muted); }
+    .field textarea{ resize:vertical; min-height:90px; }
+    .field select option{ background:var(--surface); }
+
+    .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:480px){ .row2{ grid-template-columns:1fr; } }
+
+    .btn{
+      padding:12px 24px; border-radius:9px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; border:none; cursor:pointer;
+      font-weight:700; font-size:14px; font-family:inherit;
+      transition:opacity 0.2s, transform 0.2s;
+    }
+    .btn:hover{ opacity:0.88; transform:translateY(-1px); }
+    .btn-outline{
+      padding:10px 20px; border-radius:9px;
+      background:transparent; border:1px solid var(--border);
+      color:var(--muted); cursor:pointer;
+      font-weight:600; font-size:13px; font-family:inherit;
+      transition:all 0.2s;
+    }
+    .btn-outline:hover{ border-color:var(--accent2); color:var(--accent2); }
+
+    .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+
+    .toast{
+      display:none; padding:12px 16px; border-radius:9px;
+      background:rgba(6,214,160,0.12); border:1px solid var(--safe);
+      color:var(--safe); font-size:0.85rem; font-weight:600;
+      margin-top:4px; text-align:center;
+    }
+
+    /* complaints list */
+    #complaintView{ display:none; flex-direction:column; gap:10px; }
+    .c-item{
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:10px; padding:14px 16px;
+      font-size:0.83rem; line-height:1.6;
+    }
+    .c-item strong{ color:var(--accent2); }
+    .c-num{
+      display:inline-block; background:rgba(0,180,216,0.1);
+      border:1px solid var(--accent2); color:var(--accent2);
+      border-radius:6px; padding:1px 8px; font-size:0.72rem;
+      font-weight:700; margin-bottom:6px;
+    }
+
+    footer{
+      width:100%; background:rgba(13,17,23,0.95);
+      border-top:1px solid var(--border);
+      padding:16px; font-size:0.78rem; color:var(--muted);
+      text-align:center; margin-top:auto;
+    }
+  </style>
+</head>
+<body>
+  <script>(function(){ if(!localStorage.getItem('authToken')) window.location.href='login.html'; })();</script>
+
+  <header>
+    <a href="index3.html">🛡 Home</a>
+    <div>
+      <h1>📝 File a Complaint</h1>
+      <p>Report suspicious numbers, links, or cyber fraud</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="number.html" style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">📱 Numbers</a>
+      <a href="link.html"   style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">🌐 Links</a>
+      <a href="login.html" onclick="localStorage.removeItem('authToken');localStorage.removeItem('userData');localStorage.removeItem('loginProvider');" style="padding:6px 14px;border-radius:7px;background:#1c2333;border:1px solid #30363d;color:#8b949e;text-decoration:none;font-size:0.82rem;">Logout</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h3>Complaint Details</h3>
+      <form id="complaintForm">
+        <div class="row2">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="Your full name" required>
+          </div>
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="age" placeholder="Your age" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Address</label>
+          <textarea id="address" placeholder="Your address" rows="2" required></textarea>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>Your Mobile Number</label>
+            <input type="tel" id="mobile" placeholder="+91XXXXXXXXXX" required>
+          </div>
+          <div class="field">
+            <label>Suspicious Number (if any)</label>
+            <input type="tel" id="susNumber" placeholder="+91XXXXXXXXXX">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Complaint Type</label>
+          <select id="type" required>
+            <option value="">— Select type —</option>
+            <option value="cyber-fraud">Cyber Fraud</option>
+            <option value="harassment">Online Harassment</option>
+            <option value="phishing">Phishing / Scam</option>
+            <option value="identity-theft">Identity Theft</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>Proof Image (optional)</label>
+            <input type="file" id="proof" accept="image/*">
+          </div>
+          <div class="field">
+            <label>Voice Recording (optional)</label>
+            <input type="file" id="voiceProof" accept="audio/*">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Complaint Description</label>
+          <textarea id="complaint" placeholder="Describe what happened in detail…" rows="5" required></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" type="submit">Submit Complaint</button>
+          <button class="btn-outline" type="button" onclick="loadComplaints()">View All Complaints</button>
+        </div>
+        <div class="toast" id="toast">✅ Complaint submitted successfully!</div>
+      </form>
+    </div>
+
+    <!-- Complaints list -->
+    <div id="complaintView"></div>
+  </main>
+
+  <footer>© 2025 Cyber Threat Checkur &nbsp;|&nbsp; Complaint Portal</footer>
+
+  <script>
+    document.getElementById('complaintForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const mobile = document.getElementById('mobile').value;
+      const sus    = document.getElementById('susNumber').value;
+      if (/[a-zA-Z]/.test(mobile) || mobile.replace(/\D/g,'').length < 10) {
+        alert('Mobile number must be at least 10 digits and contain no letters.'); return;
+      }
+      if (sus && (/[a-zA-Z]/.test(sus) || sus.replace(/\D/g,'').length < 10)) {
+        alert('Suspicious number must be at least 10 digits and contain no letters.'); return;
+      }
+      const token = localStorage.getItem('authToken');
+      const body = {
+        name: document.getElementById('name').value,
+        age:  document.getElementById('age').value,
+        address: document.getElementById('address').value,
+        mobile, type: document.getElementById('type').value,
+        susNumber: sus,
+        complaint: document.getElementById('complaint').value
+      };
+      try {
+        const r = await fetch('/api/complaint',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body:JSON.stringify(body)
+        });
+        const d = await r.json();
+        if (d.success) {
+          const t = document.getElementById('toast');
+          t.style.display='block';
+          setTimeout(()=>t.style.display='none', 3000);
+          e.target.reset();
+        } else { alert('Failed: '+d.error); }
+      } catch(err){ alert('Network error. Please try again.'); }
+    };
+
+    async function loadComplaints() {
+      const token = localStorage.getItem('authToken');
+      const view = document.getElementById('complaintView');
+      try {
+        const r = await fetch('/api/complaints',{headers:{'Authorization':'Bearer '+token}});
+        const list = await r.json();
+        if (!list.length) {
+          view.innerHTML = '<div class="card" style="color:var(--muted);text-align:center;">No complaints found.</div>';
+          view.style.display='flex'; return;
+        }
+        view.innerHTML = `<div class="card"><h3>All Complaints (${list.length})</h3><div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;" id="cList"></div></div>`;
+        const cList = document.getElementById('cList');
+        list.forEach((c,i) => {
+          const div = document.createElement('div');
+          div.className = 'c-item';
+          div.innerHTML = `
+            <span class="c-num">#${i+1}</span><br>
+            <strong>Name:</strong> ${c.name} &nbsp;|&nbsp; <strong>Type:</strong> ${c.type}<br>
+            <strong>Mobile:</strong> ${c.mobile} &nbsp;|&nbsp; <strong>Date:</strong> ${new Date(c.created_at).toLocaleDateString()}<br>
+            <strong>Description:</strong> ${c.complaint_text}
+          `;
+          cList.appendChild(div);
+        });
+        view.style.display='flex';
+      } catch(err){ alert('Failed to load complaints.'); }
+    }
+  </script>
+</body>
+</html>
